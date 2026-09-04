@@ -1,4 +1,3 @@
-
 const btnLogin = document.getElementById("btnLogin");
 const email = document.getElementById("email");
 const password = document.getElementById("password");
@@ -22,9 +21,14 @@ btnLogin.addEventListener("click", async (e) => {
     // Hash entered password
     const data = new TextEncoder().encode(password.value);
 
-    const hashBuffer = await crypto.subtle.digest("SHA-256", data);
+    const hashBuffer = await crypto.subtle.digest(
+        "SHA-256",
+        data
+    );
 
-    const hashArray = Array.from(new Uint8Array(hashBuffer));
+    const hashArray = Array.from(
+        new Uint8Array(hashBuffer)
+    );
 
     const hashedPassword = hashArray
         .map(byte => byte.toString(16).padStart(2, "0"))
@@ -33,7 +37,8 @@ btnLogin.addEventListener("click", async (e) => {
     // Find user
     const user = users.find(
         (user) =>
-            user.email.toLowerCase() === email.value.trim().toLowerCase() &&
+            user.email.toLowerCase() ===
+                email.value.trim().toLowerCase() &&
             user.password === hashedPassword
     );
 
@@ -49,14 +54,13 @@ btnLogin.addEventListener("click", async (e) => {
         email: user.email
     };
 
+    // Remember Me
     if (rememberMe.checked) {
-        // Keep user logged in
         localStorage.setItem(
             "loggedInUser",
             JSON.stringify(loggedInUser)
         );
     } else {
-        // Keep login only for current browser tab/session
         sessionStorage.setItem(
             "loggedInUser",
             JSON.stringify(loggedInUser)
