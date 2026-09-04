@@ -5,15 +5,13 @@ const password = document.getElementById("password");
 const confirmPassword = document.getElementById("confirmPassword");
 const registerForm = document.getElementById("registerForm");
 
-
 btnRegister.onclick = async (e) => {
-
     e.preventDefault();
 
-   
+    // Check empty fields
     if (
-        username.value === "" ||
-        email.value === "" ||
+        username.value.trim() === "" ||
+        email.value.trim() === "" ||
         password.value === "" ||
         confirmPassword.value === ""
     ) {
@@ -21,13 +19,13 @@ btnRegister.onclick = async (e) => {
         return;
     }
 
- 
+    // Check password length
     if (password.value.length < 8) {
         alert("Password must be at least 8 characters");
         return;
     }
 
-   
+    // Check number
     if (!/\d/.test(password.value)) {
         alert("Password must contain at least one number");
         return;
@@ -39,19 +37,22 @@ btnRegister.onclick = async (e) => {
         return;
     }
 
-    
-    const savedUsername = localStorage.getItem("username");
-    const savedEmail = localStorage.getItem("email");
+    // Get existing users
+    const users = JSON.parse(localStorage.getItem("users")) || [];
 
-    if (
-        savedUsername === username.value ||
-        savedEmail === email.value
-    ) {
+    // Check if username or email already exists
+    const userExists = users.some(
+        (user) =>
+            user.username.toLowerCase() === username.value.trim().toLowerCase() ||
+            user.email.toLowerCase() === email.value.trim().toLowerCase()
+    );
+
+    if (userExists) {
         alert("Username or email already exists");
         return;
     }
 
-  
+    // Hash password
     const data = new TextEncoder().encode(password.value);
 
     const hashBuffer = await crypto.subtle.digest("SHA-256", data);
@@ -59,14 +60,24 @@ btnRegister.onclick = async (e) => {
     const hashArray = Array.from(new Uint8Array(hashBuffer));
 
     const hashedPassword = hashArray
-        .map(byte => byte.toString(16).padStart(2, "0"))
+        .map((byte) => byte.toString(16).padStart(2, "0"))
         .join("");
 
-  
-    localStorage.setItem("username", username.value);
-    localStorage.setItem("email", email.value);
-    localStorage.setItem("password", hashedPassword);
+    // Create new user
+    const newUser = {
+        username: username.value.trim(),
+        email: email.value.trim(),
+        password: hashedPassword
+    };
 
-    
+    // Add new user to array
+    users.push(newUser);
+
+    // Save users array
+    localStorage.setItem("users", JSON.stringify(users));
+
+    alert("Registration successful!");
+
+    // Go to login page
     window.location.href = "login.html";
 };
